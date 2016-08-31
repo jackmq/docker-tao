@@ -1,7 +1,21 @@
 FROM php:5.6-apache
 
-MAINTAINER Ivan Klimchuk <ivan@klimchuk.com> (@alroniks)
+MAINTAINER Michele Preti <michelepreti@gmail.com> (lelmarir)
 
+ENV MYSQL_USER=mysql \
+    MYSQL_DATA_DIR=/var/lib/mysql \
+    MYSQL_RUN_DIR=/run/mysqld \
+    MYSQL_LOG_DIR=/var/log/mysql \
+    DB_USER=tao \
+    DB_PASS=tao \
+    DB_NAME=tao \
+    TAO_AUTOINSTALL=1 \
+    TAO_DB_DRIVER=pdo_mysql \
+    TAO_DB_NAME=tao \
+    TAO_DB_USER=tao \
+    TAO_DB_PASSWORD=tao \
+    TAO_MODULE_URL=http://192.168.99.100:80
+    
 RUN a2enmod rewrite expires
 
 RUN usermod -u 1000 www-data
@@ -9,14 +23,13 @@ RUN usermod -G staff www-data
 
 # install required packages
 RUN apt-get update && \
-    apt-get install -y \
-        libpng12-dev \
-        libjpeg-dev \
-        zip \
-        unzip \
-        sudo \
-        git && \
-    rm -rf /var/lib/apt/lists/* 
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y --no-install-recommends mysql-server && \
+    apt-get install -y --no-install-recommends libpng12-dev libjpeg-dev zip unzip sudo git && \
+    apt-get install -y --no-install-recommends openssh-server apache2 supervisor && \
+    mkdir -p /var/lock/apache2 /var/run/apache2 /var/run/sshd /var/log/supervisor && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf ${MYSQL_DATA_DIR}
 
 # install php extensions
 RUN docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr && \
@@ -45,53 +58,23 @@ RUN { \
 
 WORKDIR /var/www/html
 
-RUN git clone --depth 1 https://github.com/oat-sa/package-tao.git . -b develop
+RUN git clone --depth 1 https://github.com/oat-sa/package-tao.git . -b develop && \
+    curl -sS https://getcomposer.org/installer | php && \
+    php composer.phar install && \
+    find / | grep composer\.phar | xargs -n 1 rm && \
+    rm -rf /root/.composer && \
+    chown -R www-data:www-data /var/www/html
 
-# install composer
-RUN curl -sS https://getcomposer.org/installer | php
-
-# install dependencies
-RUN php composer.phar install
-
-RUN chown -R www-data:www-data /var/www/html
-
-ENV MYSQL_USER=mysql \
-    MYSQL_DATA_DIR=/var/lib/mysql \
-    MYSQL_RUN_DIR=/run/mysqld \
-    MYSQL_LOG_DIR=/var/log/mysql \
-    DB_USER=tao \
-    DB_PASS=tao \
-    DB_NAME=tao \
-    TAO_AUTOINSTALL=1 \
-    TAO_DB_DRIVER=pdo_mysql \
-    TAO_DB_NAME=tao \
-    TAO_DB_USER=tao \
-    TAO_DB_PASSWORD=tao \
-    TAO_MODULE_URL=http://192.168.99.100:80
-    
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server \
- && rm -rf ${MYSQL_DATA_DIR} \
- && rm -rf /var/lib/apt/lists/*
 
 COPY tao-docker-entrypoint.sh /tao-entrypoint.sh
-RUN chmod +x /tao-entrypoint.sh
 COPY mysql-docker-entrypoint.sh /mysql-entrypoint.sh
-RUN chmod +x /mysql-entrypoint.sh
-
-
-RUN echo "pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini
-RUN echo "mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini
-RUN echo "mysqli.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini
-
-# supervisor
-RUN apt-get update && apt-get install -y openssh-server apache2 supervisor
-RUN mkdir -p /var/lock/apache2 /var/run/apache2 /var/run/sshd /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN chmod +x /tao-entrypoint.sh \
+    && chmod +x /mysql-entrypoint.sh \
+    && echo "pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini \
+    && echo "mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini \
+    && echo "mysqli.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini
 
 EXPOSE 80
-
-#ENTRYPOINT ["/entrypoint.sh"]
-#CMD ["php-fpm"]
 
 CMD ["/usr/bin/supervisord"]
