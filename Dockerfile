@@ -75,7 +75,10 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY tao-docker-entrypoint.sh /tao-entrypoint.sh
+RUN chmod +x /tao-entrypoint.sh
 COPY mysql-docker-entrypoint.sh /mysql-entrypoint.sh
+RUN chmod +x /mysql-entrypoint.sh
+
 
 RUN echo "pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini
 RUN echo "mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/docker-php-ext-mysqli.ini
