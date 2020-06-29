@@ -65,7 +65,6 @@ RUN git clone --depth 1 https://github.com/oat-sa/package-tao.git . -b develop &
     rm -rf /root/.composer && \
     chown -R www-data:www-data /var/www/html
 
-
 COPY tao-docker-entrypoint.sh /tao-entrypoint.sh
 COPY mysql-docker-entrypoint.sh /mysql-entrypoint.sh
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
