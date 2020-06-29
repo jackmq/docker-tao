@@ -1,5 +1,5 @@
-FROM php:5.6-apache
-#FROM php:7.3-apache
+#FROM php:5.6-apache
+FROM php:7.3-apache
 
 MAINTAINER Michele Preti <michelepreti@gmail.com> (lelmarir)
 
@@ -35,12 +35,12 @@ RUN apt-get update && \
 # install php extensions
 RUN docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr && \
     docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd && \
-    docker-php-ext-configure mysql --with-mysql=mysqlnd && \
+    #docker-php-ext-configure mysql --with-mysql=mysqlnd && \
     docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     docker-php-ext-install pdo && \
     docker-php-ext-install pdo_mysql && \
     docker-php-ext-install mysqli && \
-    docker-php-ext-install mysql && \
+    #docker-php-ext-install mysql && \
     docker-php-ext-install gd && \
     docker-php-ext-install mbstring && \
     docker-php-ext-install opcache && \
@@ -52,9 +52,10 @@ RUN { \
         echo 'opcache.memory_consumption=128'; \
         echo 'opcache.interned_strings_buffer=8'; \
         echo 'opcache.max_accelerated_files=4000'; \
-        echo 'opcache.revalidate_freq=60'; \
+        echo 'opcache.revalidate_freq=2'; \
         echo 'opcache.fast_shutdown=1'; \
         echo 'opcache.enable_cli=1'; \
+        echo 'opcache.load_comments=1'; \
     } > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
 WORKDIR /var/www/html
