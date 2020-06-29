@@ -26,7 +26,7 @@ RUN usermod -G staff www-data
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends mysql-server && \
-    apt-get install -y --no-install-recommends libpng12-dev libjpeg-dev zip unzip sudo git && \
+    apt-get install -y --no-install-recommends libpng-dev libjpeg-dev zip unzip sudo git && \
     apt-get install -y --no-install-recommends openssh-server apache2 supervisor && \
     mkdir -p /var/lock/apache2 /var/run/apache2 /var/run/sshd /var/log/supervisor && \
     rm -rf /var/lib/apt/lists/* && \
