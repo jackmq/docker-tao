@@ -14,7 +14,7 @@ ENV MYSQL_USER=mysql \
     TAO_DB_NAME=tao \
     TAO_DB_USER=tao \
     TAO_DB_PASSWORD=tao \
-    TAO_MODULE_URL=http://192.168.99.100:80
+    TAO_MODULE_URL=http://tao.test.onpencil.io:80
     
 RUN a2enmod rewrite expires
 
