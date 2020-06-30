@@ -36,10 +36,11 @@ RUN apt-get update && \
 RUN docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr && \
     docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd && \
     #docker-php-ext-configure mysql --with-mysql=mysqlnd && \
-    docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
-    docker-php-ext-configure zip --with-libzip
+    docker-php-ext-configure mysqli --with-mysqli=mysqlnd
+    # docker-php-ext-configure zip --with-libzip
 
-RUN yes | pecl install igbinary redis
+RUN yes | pecl install igbinary
+#redis
 
 RUN docker-php-ext-install pdo && \
     docker-php-ext-install pdo_mysql && \
