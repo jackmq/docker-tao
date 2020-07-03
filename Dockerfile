@@ -71,7 +71,7 @@ RUN { \
 ENV TAO_VERSION 3.2.0-RC2_build
 ENV TAO_SHA1 2e8f42f4ad07444c25b4b50a539aefdd83a5b5d1
 
-RUN curl -o -k tao.zip -SL http://releases.taotesting.com/TAO_${TAO_VERSION}.zip \
+RUN curl -k -o tao.zip -SL http://releases.taotesting.com/TAO_${TAO_VERSION}.zip \
   && echo "$TAO_SHA1 *tao.zip" | sha1sum -c - \
   && unzip -qq tao.zip -d /usr/src \
   && mv /usr/src/TAO_${TAO_VERSION} /var/www/html \
